@@ -14,6 +14,17 @@ RED = Fore.RED
 RESET = Style.RESET_ALL
 
 
+def progress_bar(percentage, length=20):
+    """
+    Returns a string representing a progress bar.
+    percentage: 0-100
+    length: number of characters in the bar
+    """
+    filled_length = int(length * percentage // 100)
+    bar = f"{GREEN}{'█'*filled_length}{RESET}{'-'*(length-filled_length)} {percentage:.0f}%"
+    return bar
+
+
 def main():
     # Initialize storage and load existing data
     store = JSONStore()
@@ -35,7 +46,6 @@ def main():
         command = input("\n> ").strip().lower()
 
         if command == "exit":
-            # Save before quitting
             store.save(list(tracker.topics.values()), sessions)
             print(f"{GREEN}Progress saved. Goodbye!{RESET}")
             break
@@ -68,7 +78,15 @@ def main():
                 print(f"{RED}No topics available.{RESET}")
 
         elif command == "summary":
-            print(tracker.summary())
+            if tracker.topics:
+                print("Study Progress Summary:")
+                for t in tracker.topics.values():
+                    bar = progress_bar(t.mastery)
+                    print(f"{t.name.ljust(15)} {bar}")
+                overall = tracker.course_progress()
+                print(f"\nOverall Progress: {overall:.1f}%")
+            else:
+                print(f"{RED}No topics added yet.{RESET}")
 
         elif command == "list-topics":
             if tracker.topics:
